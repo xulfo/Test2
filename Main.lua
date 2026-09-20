@@ -940,7 +940,7 @@ function Library:Notify(opts)
 
     local titleLabel = New("TextLabel", {
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 18),
+        Size = UDim2.new(1, -28, 0, 18),
         Text = opts.Title or "ARC",
         TextColor3 = C("Text"),
         TextTransparency = 1,
@@ -952,7 +952,7 @@ function Library:Notify(opts)
 
     local descLabel = New("TextLabel", {
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 0),
+        Size = UDim2.new(1, -28, 0, 0),
         AutomaticSize = Enum.AutomaticSize.Y,
         Text = opts.Description or "",
         TextColor3 = C("Dim"),
@@ -1104,6 +1104,27 @@ function Library:CreateWindow(opts)
         BackgroundColor3 = C("Sidebar"),
     }, main)
     Reg(sidebar, "Sidebar")
+    -- UICorner does not clip children round in Roblox, so the sidebar
+    -- gets its own corner radius; the two right corners are squared off
+    -- again with same-color patches so only the window's outer left
+    -- corners stay round.
+    Corner(sidebar, 14)
+    local patchTop = New("Frame", {
+        AnchorPoint = Vector2.new(1, 0),
+        Position = UDim2.new(1, 0, 0, 0),
+        Size = UDim2.new(0, 15, 0, 15),
+        BackgroundColor3 = C("Sidebar"),
+        BorderSizePixel = 0,
+    }, sidebar)
+    Reg(patchTop, "Sidebar")
+    local patchBottom = New("Frame", {
+        AnchorPoint = Vector2.new(1, 1),
+        Position = UDim2.new(1, 0, 1, 0),
+        Size = UDim2.new(0, 15, 0, 15),
+        BackgroundColor3 = C("Sidebar"),
+        BorderSizePixel = 0,
+    }, sidebar)
+    Reg(patchBottom, "Sidebar")
     window.Sidebar = sidebar
 
     -- divider between sidebar and content
@@ -1421,7 +1442,9 @@ function WindowMT:AddTab(opts)
     }, page)
     local list = New("Frame", {
         Name = "List",
-        Size = UDim2.new(1, 0, 0, 0),
+        -- width minus left+right padding: UIPadding does NOT shrink
+        -- Scale-1 children in Roblox, so the inset is baked in here
+        Size = UDim2.new(1, -40, 0, 0),
         AutomaticSize = Enum.AutomaticSize.Y,
         BackgroundTransparency = 1,
     }, page)
@@ -2658,7 +2681,7 @@ function TabMT:AddColorpicker(opts)
     Reg(hexInput, "Text", "TextColor3")
 
     local rgbLabel = New("TextLabel", {
-        Size = UDim2.new(1, 0, 1, 0),
+        Size = UDim2.new(1, -118, 1, 0),
         BackgroundTransparency = 1,
         Text = "",
         TextColor3 = C("Dim"),
@@ -2912,7 +2935,7 @@ function TabMT:AddParagraph(opts)
     }, row)
 
     local titleLabel = New("TextLabel", {
-        Size = UDim2.new(1, 0, 0, 18),
+        Size = UDim2.new(1, -32, 0, 18),
         BackgroundTransparency = 1,
         Text = opts.Title or "",
         TextColor3 = C("Text"),
@@ -2923,7 +2946,7 @@ function TabMT:AddParagraph(opts)
     Reg(titleLabel, "Text", "TextColor3")
 
     local body = New("TextLabel", {
-        Size = UDim2.new(1, 0, 0, 0),
+        Size = UDim2.new(1, -32, 0, 0),
         AutomaticSize = Enum.AutomaticSize.Y,
         BackgroundTransparency = 1,
         Text = opts.Text or "",
@@ -3519,7 +3542,7 @@ function TabMT:AddPlayerList(opts)
     }, row)
 
     local header = New("Frame", {
-        Size = UDim2.new(1, 0, 0, 24),
+        Size = UDim2.new(1, -32, 0, 24),
         BackgroundTransparency = 1,
     }, row)
     local headTitle = New("TextLabel", {
@@ -3549,7 +3572,7 @@ function TabMT:AddPlayerList(opts)
     Corner(refreshBtn, 7)
 
     local listBox = New("Frame", {
-        Size = UDim2.new(1, 0, 0, 0),
+        Size = UDim2.new(1, -32, 0, 0),
         AutomaticSize = Enum.AutomaticSize.Y,
         BackgroundTransparency = 1,
     }, row)
