@@ -1087,7 +1087,7 @@ function Library:CreateWindow(opts)
         Name = "Main",
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0, 780, 0, 520),
+        Size = UDim2.new(0, 780, 0, 575),
         BackgroundColor3 = C("Window"),
         ClipsDescendants = true,
     }, gui)
@@ -1095,7 +1095,7 @@ function Library:CreateWindow(opts)
     Corner(main, 14)
     Stroke(main, 0.72)
     window.Main = main
-    window._FullSize = UDim2.new(0, 780, 0, 520)
+    window._FullSize = UDim2.new(0, 780, 0, 575)
 
     ------------------------------------------------------------- sidebar
     local sidebar = New("Frame", {
@@ -1233,15 +1233,31 @@ function Library:CreateWindow(opts)
         Position = UDim2.new(1, -8, 0, 6),
         Size = UDim2.new(0, 32, 0, 32),
         BackgroundTransparency = 1,
-        Text = "✕",
-        TextColor3 = C("Dim"),
-        TextSize = 15,
-        Font = Enum.Font.GothamMedium,
+        Text = "",
         AutoButtonColor = false,
         ZIndex = 7,
     }, topbar)
     Reg(closeBtn, "Dim", "TextColor3")
     Corner(closeBtn, 8)
+    -- drawn X (font-independent, renders on every executor)
+    local xA = New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 14, 0, 2),
+        Rotation = 45,
+        BackgroundColor3 = C("Dim"),
+        BorderSizePixel = 0,
+    }, closeBtn)
+    Reg(xA, "Dim")
+    local xB = New("Frame", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 14, 0, 2),
+        Rotation = -45,
+        BackgroundColor3 = C("Dim"),
+        BorderSizePixel = 0,
+    }, closeBtn)
+    Reg(xB, "Dim")
     closeBtn.MouseEnter:Connect(function()
         Tween(closeBtn, { BackgroundColor3 = C("Tile"), BackgroundTransparency = 0.4 }, 0.15)
     end)
@@ -1390,7 +1406,9 @@ function WindowMT:AddTab(opts)
         Name = "Page_" .. tab.Name,
         Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1,
-        ScrollBarThickness = 0,
+        ScrollBarThickness = 3,
+        ScrollBarImageColor3 = C("Dimmer"),
+        ScrollBarImageTransparency = 0.4,
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         CanvasSize = UDim2.new(0, 0, 0, 0),
         Visible = false,
@@ -4077,7 +4095,7 @@ end
     palette and white linework. These are the exact tokens used:
 
     GEOMETRY
-        Window size          780 × 520, corner radius 14 (fully rounded)
+        Window size          780 × 575, corner radius 14 (fully rounded)
         Sidebar width        200, nav items 40 tall, radius 10
         Hero card            210 tall, radius 14
         Quick-access cards   96 tall, radius 14, grid gap 14
@@ -4249,18 +4267,25 @@ function WindowMT:_AttachResize()
     local grip = New("TextButton", {
         Name = "ResizeGrip",
         AnchorPoint = Vector2.new(1, 1),
-        Position = UDim2.new(1, -4, 1, -4),
-        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(1, -6, 1, -6),
+        Size = UDim2.new(0, 18, 0, 18),
         BackgroundTransparency = 1,
-        Text = "⋰",
-        TextColor3 = C("Dimmer"),
-        TextSize = 12,
-        Font = Enum.Font.GothamBold,
+        Text = "",
         AutoButtonColor = false,
         ZIndex = 8,
     }, self.Main)
-    Reg(grip, "Dimmer", "TextColor3")
-    MakeResizable(self.Main, grip, Vector2.new(620, 420), Vector2.new(1200, 800))
+    -- drawn diagonal dots (font-independent)
+    for _, offset in ipairs({ { 12, 12 }, { 6, 12 }, { 12, 6 } }) do
+        local dot = New("Frame", {
+            Position = UDim2.new(0, offset[1], 0, offset[2]),
+            Size = UDim2.new(0, 3, 0, 3),
+            BackgroundColor3 = C("Dimmer"),
+            BorderSizePixel = 0,
+        }, grip)
+        Reg(dot, "Dimmer")
+        Corner(dot, 1)
+    end
+    MakeResizable(self.Main, grip, Vector2.new(620, 460), Vector2.new(1200, 800))
     self._ResizeGrip = grip
 end
 
@@ -4805,7 +4830,7 @@ end
     Tab:AddPlayerList({ Title, Callback }) → { Refresh() }
 
     Window:_AttachResize() runs automatically; drag the ⋰ grip in the
-    bottom-right corner to resize between 620×420 and 1200×800.
+    bottom-right corner to resize between 620×460 and 1200×800.
 ]]
 
 
@@ -4947,7 +4972,7 @@ end
        Mono and Rose. Add unlimited custom themes via ARC.Themes.
 
     Q: Is the window resizable?
-    A: Yes, drag the ⋰ grip (bottom-right). Bounds 620×420 – 1200×800.
+    A: Yes, drag the dot grip (bottom-right). Bounds 620×460 – 1200×800.
 
     ════════════════════════════════════════════════════════════════════
     ARC v2.0.0 — 5,000+ lines. Simple. Clean. Powerful.
