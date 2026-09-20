@@ -135,7 +135,7 @@ local HttpService      = game:GetService("HttpService")
 
 ---------------------------------------------------------------- library ----
 local Library = {
-    Version      = "2.0.0",
+    Version      = "2.1.1",
     Flags        = {},
     Themes       = {},
     CurrentTheme = "Midnight",
@@ -7259,6 +7259,10 @@ end
              tooltips, typed toasts, frosted glass, nav indicator +
              hairline, 23 themes, badge API, JSON theme loading,
              Counter/FPS/Table elements, docs A–Z8.
+    v2.1.1   Real-client hotfix: removed custom fields on Instances
+             (icon segments now live in a weak side-table) — fixes
+             "_Segs is not a valid member of Frame" on executors;
+             fixed AddSpark Row call; version banner now 2.1.1.
     ROADMAP  · keyframe icon packs (.json)
              · draggable sub-windows
              · chart elements (sparklines)
