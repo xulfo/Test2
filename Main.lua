@@ -135,7 +135,7 @@ local HttpService      = game:GetService("HttpService")
 
 ---------------------------------------------------------------- library ----
 local Library = {
-    Version      = "2.1.1",
+    Version      = "2.2.0",
     Flags        = {},
     Themes       = {},
     CurrentTheme = "Midnight",
@@ -821,6 +821,19 @@ local function MakeIcon(parent, icon, size, colorRole)
         Reg(obj, role, "ImageColor3")
         return obj
     end
+    -- texture icons from the curated asset set (sharper than vectors);
+    -- anything not listed falls through to the drawn version.
+    if type(icon) == "string" and Library.Icons.Asset and Library.Icons.Asset[icon] then
+        local obj = New("ImageLabel", {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, size, 0, size),
+            Image = Library.Icons.Asset[icon],
+            ImageColor3 = C(role),
+            ScaleType = Enum.ScaleType.Fit,
+        }, parent)
+        Reg(obj, role, "ImageColor3")
+        return obj
+    end
     if Library.Icons and Library.Icons[icon] then
         return Library.Icons.Draw(parent, icon, size, role)
     end
@@ -1228,8 +1241,8 @@ function Library:CreateWindow(opts)
     sidebar.ClipsDescendants = true
     local navInd = New("Frame", {
         Name = "NavIndicator",
-        Position = UDim2.new(0, 6, 0, 90),
-        Size = UDim2.new(0, 3, 0, 28),
+        Position = UDim2.new(0, 7, 0, 90),
+        Size = UDim2.new(0, 2, 0, 20),
         BackgroundColor3 = C("Accent"),
         BorderSizePixel = 0,
         ZIndex = 2,
@@ -1439,27 +1452,27 @@ function WindowMT:AddTab(opts)
     ---------------------------------------------------- nav button
     local navBtn = New("TextButton", {
         Name = "Nav_" .. tab.Name,
-        Size = UDim2.new(1, 0, 0, 40),
+        Size = UDim2.new(1, 0, 0, 36),
         BackgroundColor3 = C("Tile"),
         BackgroundTransparency = 1,
         AutoButtonColor = false,
         Text = "",
     }, window.NavList)
     Reg(navBtn, "Tile")
-    Corner(navBtn, 10)
-    local navStroke = Stroke(navBtn, 0.8)
+    Corner(navBtn, 8)
+    local navStroke = Stroke(navBtn, 0.9)
     navStroke.Enabled = false
 
-    local icon = MakeIcon(navBtn, opts.Icon or "dot", 18, "Dim")
-    icon.Position = UDim2.new(0, 12, 0.5, -9)
+    local icon = MakeIcon(navBtn, opts.Icon or "dot", 16, "Dim")
+    icon.Position = UDim2.new(0, 13, 0.5, -8)
 
     local label = New("TextLabel", {
-        Position = UDim2.new(0, 42, 0, 0),
-        Size = UDim2.new(1, -50, 1, 0),
+        Position = UDim2.new(0, 39, 0, 0),
+        Size = UDim2.new(1, -46, 1, 0),
         BackgroundTransparency = 1,
         Text = tab.Name,
         TextColor3 = C("Dim"),
-        TextSize = 14,
+        TextSize = 13,
         Font = Enum.Font.GothamMedium,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
@@ -1508,7 +1521,6 @@ function WindowMT:AddTab(opts)
         window:SelectTab(tab)
     end)
     navBtn.ClipsDescendants = true
-    Library.Effects.Ripple(navBtn, "White")
     if opts.Tooltip then
         Library.Tooltip.Attach(navBtn, opts.Tooltip)
     end
@@ -1642,21 +1654,8 @@ function WindowMT:_BuildHomePage(tab, opts, subtitle)
         BackgroundColor3 = C("Card"),
     }, list)
     Reg(hero, "Card")
-    Corner(hero, 14)
-    Stroke(hero, 0.82)
-    Library.Effects.Sheen(hero, true)
-
-    New("UIGradient", {
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(160, 160, 160)),
-        }),
-        Rotation = 25,
-        Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.92),
-            NumberSequenceKeypoint.new(1, 0.86),
-        }),
-    }, hero)
+    Corner(hero, 12)
+    Stroke(hero, 0.9)
 
     -- big logo on the right
     New("ImageLabel", {
@@ -1862,8 +1861,8 @@ local function Row(tab, height, auto)
         ClipsDescendants = true,
     }, tab.List)
     Reg(row, "Card")
-    Corner(row, 12)
-    Stroke(row, 0.85)
+    Corner(row, 10)
+    Stroke(row, 0.9)
     return row
 end
 
@@ -1875,7 +1874,7 @@ local function RowTitle(row, opts, twoLines)
         BackgroundTransparency = 1,
         Text = opts.Title or "Element",
         TextColor3 = C("Text"),
-        TextSize = 14,
+        TextSize = 13,
         Font = Enum.Font.GothamSemibold,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = twoLines and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center,
@@ -1889,7 +1888,7 @@ local function RowTitle(row, opts, twoLines)
             BackgroundTransparency = 1,
             Text = opts.Description,
             TextColor3 = C("Dim"),
-            TextSize = 12,
+            TextSize = 11,
             Font = Enum.Font.Gotham,
             TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
@@ -1921,72 +1920,58 @@ function TabMT:AddCard(opts)
         Text = "",
     }, grid)
     Reg(card, "Card")
-    Corner(card, 14)
-    Stroke(card, 0.82)
+    Corner(card, 10)
+    Stroke(card, 0.9)
     HoverBg(card, "Card", "Hover")
-    card.ClipsDescendants = true
-    Library.Effects.Ripple(card, "White")
-    Library.Effects.Sheen(card)
 
-    -- icon tile
-    local tile = New("Frame", {
-        Position = UDim2.new(0, 14, 0.5, -23),
-        Size = UDim2.new(0, 46, 0, 46),
-        BackgroundColor3 = C("Tile"),
-    }, card)
-    Reg(tile, "Tile")
-    Corner(tile, 12)
-    local icon = MakeIcon(card, opts.Icon or "□", 20, "Text")
-    icon.Position = UDim2.new(0, 27, 0.5, -10)
+    -- flat icon, vertically centered on the left
+    local icon = MakeIcon(card, opts.Icon or "dot", 17, "Dim")
+    icon.Position = UDim2.new(0, 16, 0.5, -8)
 
-    -- texts
     local cardTitle = New("TextLabel", {
-        Position = UDim2.new(0, 74, 0, 16),
-        Size = UDim2.new(1, -132, 0, 18),
+        Position = UDim2.new(0, 46, 0.5, -17),
+        Size = UDim2.new(1, -86, 0, 17),
         BackgroundTransparency = 1,
         Text = opts.Title or "Card",
         TextColor3 = C("Text"),
-        TextSize = 14,
+        TextSize = 13,
         Font = Enum.Font.GothamSemibold,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
     }, card)
     Reg(cardTitle, "Text", "TextColor3")
     local cardDesc = New("TextLabel", {
-        Position = UDim2.new(0, 74, 0, 38),
-        Size = UDim2.new(1, -132, 0, 42),
+        Position = UDim2.new(0, 46, 0.5, 2),
+        Size = UDim2.new(1, -86, 0, 30),
         BackgroundTransparency = 1,
         Text = opts.Description or "",
         TextColor3 = C("Dim"),
-        TextSize = 12,
+        TextSize = 11,
         Font = Enum.Font.Gotham,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextYAlignment = Enum.TextYAlignment.Top,
         TextWrapped = true,
+        TextTruncate = Enum.TextTruncate.AtEnd,
     }, card)
     Reg(cardDesc, "Dim", "TextColor3")
 
-    -- arrow
-    local arrow = New("TextLabel", {
-        AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -16, 0.5, 0),
-        Size = UDim2.new(0, 18, 0, 18),
-        BackgroundTransparency = 1,
-        Text = "→",
-        TextColor3 = C("Dim"),
-        TextSize = 15,
-        Font = Enum.Font.GothamMedium,
-    }, card)
-    Reg(arrow, "Dim", "TextColor3")
+    -- quiet chevron on the right; accents on hover
+    local arrow = MakeIcon(card, "arrowright", 12, "Dimmer")
+    arrow.AnchorPoint = Vector2.new(1, 0.5)
+    arrow.Position = UDim2.new(1, -14, 0.5, 0)
 
+    card.MouseEnter:Connect(function()
+        RecolorIcon(icon, "Text")
+        RecolorIcon(arrow, "Accent")
+        Tween(cardTitle, { TextColor3 = C("White") }, 0.15)
+    end)
+    card.MouseLeave:Connect(function()
+        RecolorIcon(icon, "Dim")
+        RecolorIcon(arrow, "Dimmer")
+        Tween(cardTitle, { TextColor3 = C("Text") }, 0.15)
+    end)
     card.MouseButton1Click:Connect(function()
         SoundEngine:Play("Click")
-        Tween(card, { BackgroundColor3 = C("Tile") }, 0.08)
-        task.delay(0.12, function()
-            if card.Parent then
-                Tween(card, { BackgroundColor3 = C("Card") }, 0.2)
-            end
-        end)
         if opts.Callback then
             task.spawn(opts.Callback)
         end
@@ -5514,7 +5499,7 @@ end
 function Icons.Names()
     local names = {}
     for name, value in pairs(Icons) do
-        if type(value) == "table" then
+        if type(value) == "table" and name ~= "Alias" and name ~= "Asset" then
             table.insert(names, name)
         end
     end
@@ -5621,7 +5606,7 @@ function WindowMT:_MoveNavInd(tab, instant)
         local sideAbs = self.Sidebar.AbsolutePosition.Y
         local btnAbs = tab.NavButton.AbsolutePosition.Y
         local y = btnAbs - sideAbs
-        local target = UDim2.new(0, 6, 0, y + 6)
+        local target = UDim2.new(0, 7, 0, y + 8)
         if instant then
             ind.Position = target
         else
@@ -6260,10 +6245,50 @@ Icons.Alias = {
     close    = "x",
 }
 
+--- Curated high-res texture icons (community asset set). Any name not
+-- listed here renders with the built-in drawn vector instead, so the
+-- UI never shows a blank square even if an asset fails to load... a
+-- missing texture just falls back via Icons.Draw at MakeIcon level.
+Icons.Asset = {
+    home      = "rbxassetid://4562959382",
+    search    = "rbxassetid://18733177504",
+    gear      = "rbxassetid://117427252698455",
+    settings  = "rbxassetid://4738901432",
+    grid      = "rbxassetid://10734950309",
+    sword     = "rbxassetid://10747384394",
+    shield    = "rbxassetid://98206735878224",
+    target    = "rbxassetid://123292899197910",
+    crosshair = "rbxassetid://10723434538",
+    bolt      = "rbxassetid://79160363518966",
+    user      = "rbxassetid://10747387118",
+    eye       = "rbxassetid://131012605615689",
+    globe     = "rbxassetid://13567318216",
+    heart     = "rbxassetid://10723415389",
+    warning   = "rbxassetid://10747387522",
+    check     = "rbxassetid://5180860280",
+    lock      = "rbxassetid://10723417148",
+    key       = "rbxassetid://10723417148",
+    refresh   = "rbxassetid://10723417783",
+    folder    = "rbxassetid://10709791437",
+    file      = "rbxassetid://10709791258",
+    code      = "rbxassetid://10709751190",
+    play      = "rbxassetid://10723422607",
+    music     = "rbxassetid://10723421745",
+    clock     = "rbxassetid://10723345037",
+    star      = "rbxassetid://10734924532",
+    crown     = "rbxassetid://10734924532",
+    spark     = "rbxassetid://10723422246",
+    edit      = "rbxassetid://100244385350031",
+    trash     = "rbxassetid://10723415903",
+    gift      = "rbxassetid://10723415389",
+    info      = "rbxassetid://10723345067",
+}
+
 --- Alias-resolving lookup used by Icons.Draw.
 function Icons.Resolve(name)
     if type(name) ~= "string" then return nil end
-    if Icons[name] and type(Icons[name]) == "table" and name ~= "Alias" then
+    if Icons[name] and type(Icons[name]) == "table"
+        and name ~= "Alias" and name ~= "Asset" then
         return Icons[name]
     end
     local target = Icons.Alias[name]
@@ -7263,6 +7288,13 @@ end
              (icon segments now live in a weak side-table) — fixes
              "_Segs is not a valid member of Frame" on executors;
              fixed AddSpark Row call; version banner now 2.1.1.
+    v2.2.0   Visual cleanup: removed all automatic shimmer/sheen
+             sweeps (hero, cards) and card/nav click ripples for a
+             calmer, less "generated" look; quick-access cards
+             redesigned (flat icon, quiet chevron, hover accenting);
+             navigation slimmed to 36px rows with a subtler 2px
+             indicator; curated texture icon set (Icons.Asset) with
+             drawn-vector fallback for sharper visuals.
     ROADMAP  · keyframe icon packs (.json)
              · draggable sub-windows
              · chart elements (sparklines)
