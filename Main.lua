@@ -836,12 +836,19 @@ local function MakeIcon(parent, icon, size, colorRole)
     return obj
 end
 
+--- Side-table of drawn-icon segments (weak keys so icons can GC).
+-- Needed because Roblox instances refuse arbitrary custom fields.
+local IconSegs = setmetatable({}, { __mode = "k" })
+
 --- Recolors any icon kind (glyph, drawn segments) for hover/selection.
 local function RecolorIcon(icon, role)
     if not icon then return end
     local color = C(role)
-    if icon._Segs then
-        for _, seg in ipairs(icon._Segs) do
+    -- (Roblox instances reject custom fields, so segments are tracked
+    --  in a weak side-table; see Icons.Draw)
+    local segs = IconSegs[icon]
+    if segs then
+        for _, seg in ipairs(segs) do
             Tween(seg, { BackgroundColor3 = color }, 0.2)
         end
     elseif icon:IsA("TextLabel") then
@@ -5484,7 +5491,8 @@ function Icons.Draw(parent, name, size, role)
         Size = UDim2.new(0, size, 0, size),
         BorderSizePixel = 0,
     }, parent)
-    box._Segs = {}
+    local segList = {}
+    IconSegs[box] = segList
     local unit = size / 24
     for _, s in ipairs(def) do
         local seg = New("Frame", {
@@ -5497,7 +5505,7 @@ function Icons.Draw(parent, name, size, role)
         if s[5] then seg.Rotation = s[5] end
         Corner(seg, math.max(1, (s[6] or 1) * unit))
         Reg(seg, role or "Text")
-        table.insert(box._Segs, seg)
+        table.insert(segList, seg)
     end
     return box
 end
@@ -5799,9 +5807,9 @@ Library.Themes.Neon = {
         local icon = ARC.Icons.Draw(frame, "eye", 20, "Text")
         print(table.concat(ARC.Icons.Names(), ", "))
 
-    Every drawn icon exposes icon._Segs (its segment frames); the engine
-    uses that for hover / selection recoloring, and themes sweep it
-    automatically through the registry.
+    Every drawn icon keeps its segment frames in an internal weak
+    table; the engine uses that for hover / selection recoloring,
+    and themes sweep it automatically through the registry.
 ]]
 
 --[[
@@ -7420,7 +7428,8 @@ end
 -- spark.Set({ 1, 4, 2, 8, … }) re-renders at any time.
 function TabMT:AddSpark(opts)
     opts = opts or {}
-    local row = Row(self.Page, opts.Title or "Spark", opts)
+    local row = Row(self, 48)
+    RowTitle(row, opts, false)
     local holder = New("Frame", {
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -14, 0.5, 0),
@@ -7647,9 +7656,10 @@ end
     Walkthrough: how AddSpark was added (use as a template).
 
     STEP 1 — CHOOSE A CONTAINER
-        local row = Row(self.Page, opts.Title or "My Element", opts)
-        Row() gives you: 48px card, title, optional description,
-        hover tint, theme registration. Return value is the Frame.
+        local row = Row(self, 48)          -- 48px card, themed bg
+        RowTitle(row, opts, false)         -- title + description
+        Row() gives you the themed card; RowTitle() adds the left
+        labels with automatic theme registration.
 
     STEP 2 — PLACE YOUR VISUALS
         Anchor controls to the RIGHT side of the row:
